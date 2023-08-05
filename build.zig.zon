@@ -1,0 +1,10 @@
+.{
+    .name = "libusocket",
+    .version = "0.8.6",
+    .dependencies = .{
+        .boringssl = .{
+            .url = "https://github.com/lithdew/boringssl-zig/archive/6c67d8da4d4424df58ffbe8b920a7c8dc386ee83.tar.gz",
+            .hash = "1220cdc8db35b4a4a983741110e85a1e8b7121cee9a06668a3bd8313c0d5e3f070ac",
+        }
+    }
+}
