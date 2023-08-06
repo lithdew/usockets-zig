@@ -1,13 +1,9 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-
-    const boringssl_dep = b.dependency("boringssl", .{
-        .target = target,
-        .optimize = optimize,
-    });
+    const ssl = b.option(bool, "ssl", "Enable SSL support") orelse false;
 
     const lib = b.addStaticLibrary(.{
         .name = "usockets",
@@ -16,9 +12,23 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    var flags = std.ArrayList([]const u8).init(b.allocator);
+    defer flags.deinit();
+
     lib.linkLibC();
-    lib.linkLibCpp();
-    lib.linkLibrary(boringssl_dep.artifact("ssl"));
+    if (ssl) {
+        const boringssl_dep = b.dependency("boringssl", .{
+            .target = target,
+            .optimize = optimize,
+        });
+
+        lib.linkLibCpp();
+        lib.linkLibrary(boringssl_dep.artifact("ssl"));
+
+        try flags.append("-DLIBUS_USE_OPENSSL");
+    } else {
+        try flags.append("-DLIBUS_NO_SSL");
+    }
     lib.addIncludePath(.{ .cwd_relative = "vendor/src" });
     lib.installHeader("vendor/src/libusockets.h", "libusockets.h");
     lib.installHeader("vendor/src/quic.h", "quic.h");
@@ -37,7 +47,7 @@ pub fn build(b: *std.Build) void {
         "vendor/src/quic.c",
         "vendor/src/socket.c",
         "vendor/src/udp.c",
-    }, &.{"-DLIBUS_USE_OPENSSL"});
+    }, flags.items);
 
     b.installArtifact(lib);
 
