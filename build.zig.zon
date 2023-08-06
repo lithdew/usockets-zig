@@ -1,5 +1,5 @@
 .{
-    .name = "libusocket",
+    .name = "usockets",
     .version = "0.8.6",
     .dependencies = .{
         .boringssl = .{
