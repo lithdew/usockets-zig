@@ -22,7 +22,7 @@ test "usocket: tcp e2e" {
 
         // 's' is an incoming socket. NOT the listener socket.
         fn onData(s: ?*c.us_socket_t, data_ptr: [*c]u8, data_len: c_int) callconv(.C) ?*c.us_socket_t {
-            std.debug.assert(s == @as(*c.us_socket_t, @ptrCast(@This().socket)));
+            std.debug.assert(s != @as(*c.us_socket_t, @ptrCast(@This().socket)));
             const actual_data = data_ptr[0..@intCast(data_len)];
             std.debug.assert(std.mem.eql(u8, data, actual_data));
             return c.us_socket_close(0, s, 0, null);

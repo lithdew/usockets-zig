@@ -7,7 +7,6 @@ pub fn build(b: *std.Build) !void {
 
     const lib = b.addStaticLibrary(.{
         .name = "usockets",
-        .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
         .optimize = optimize,
     });
