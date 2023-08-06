@@ -3,7 +3,9 @@ const std = @import("std");
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    
     const ssl = b.option(bool, "ssl", "Enable SSL support") orelse false;
+    const uv = b.option(bool, "uv", "Enable libuv support") orelse false;
 
     const lib = b.addStaticLibrary(.{
         .name = "usockets",
@@ -15,6 +17,7 @@ pub fn build(b: *std.Build) !void {
     defer flags.deinit();
 
     lib.linkLibC();
+
     if (ssl) {
         const boringssl_dep = b.dependency("boringssl", .{
             .target = target,
@@ -28,6 +31,18 @@ pub fn build(b: *std.Build) !void {
     } else {
         try flags.append("-DLIBUS_NO_SSL");
     }
+
+    if (uv) {
+        const libuv_dep = b.dependency("libuv", .{
+            .target = target,
+            .optimize = optimize,
+        });
+        
+        lib.linkLibrary(libuv_dep.artifact("uv"));
+
+        try flags.append("-DLIBUS_USE_LIBUV");
+    }
+
     lib.addIncludePath(.{ .cwd_relative = "vendor/src" });
     lib.installHeader("vendor/src/libusockets.h", "libusockets.h");
     lib.installHeader("vendor/src/quic.h", "quic.h");
