@@ -43,7 +43,7 @@ pub fn build(b: *std.Build) !void {
         try flags.append("-DLIBUS_USE_LIBUV");
     }
 
-    lib.addIncludePath(.{ .cwd_relative = "vendor/src" });
+    lib.addIncludePath(.{ .path = "vendor/src" });
     lib.installHeader("vendor/src/libusockets.h", "libusockets.h");
     lib.installHeader("vendor/src/quic.h", "quic.h");
     lib.addCSourceFiles(&.{
